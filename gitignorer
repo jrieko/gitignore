@@ -1,0 +1,84 @@
+#!/bin/bash
+
+templateDir=$HOME/git/gitignore
+templates=()
+for templatePath in $(find $templateDir -name "*.gitignore"); do
+  if [[ $templatePath =~ .*?/([[:alnum:][:punct:]]+)\.gitignore$ ]]; then
+    name=${BASH_REMATCH[1]}
+    path=$templatePath
+    templates[${#templates[*]}]="$name:$path"
+  fi
+done
+
+
+usage() {
+  echo "Usage:"
+  echo ""
+  echo "$(basename $0) list"
+  echo "    List available templates"
+  echo ""
+  echo "$(basename $0) create [template]..."
+  echo "    Create a new .gitignore file in the current directory containing ignores for the specified templates"
+}
+
+if [ $# -lt 1 ]; then
+  usage
+  exit 1;
+fi
+
+list() {
+  for template in ${templates[@]}; do
+    IFS=':' read -a templateVars <<< "$template"
+    templateName=${templateVars[0]}
+    echo "$templateName"
+  done
+}
+
+add() {
+  if [ $# -lt 1 ]; then
+    usage
+    exit 5;
+  fi
+
+  langs=$@
+  shopt -s nocasematch
+  for lang in $langs; do
+    for template in ${templates[@]}; do
+      IFS=':' read -a templateVars <<< "$template"
+      templateName=${templateVars[0]}
+      templatePath=${templateVars[1]}
+      if [[ "$lang" =~ ^${templateName}$ ]]; then
+        echo "" >> .gitignore
+        echo "## $templateName ##" >> .gitignore
+        cat $templatePath >> .gitignore
+        echo "" >> .gitignore
+        break
+      fi
+    done
+  done
+}
+
+create() {
+  echo -n "" > .gitignore
+  add $@
+}
+
+case $1 in
+  list)
+    shift
+    list $@ | sort
+    ;;
+  add)
+    shift
+    add $@
+    ;;
+  create)
+    shift
+    create $@
+    ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac
+exit $?
