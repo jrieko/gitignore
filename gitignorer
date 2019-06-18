@@ -47,7 +47,7 @@ add() {
       IFS=':' read -a templateVars <<< "$template"
       templateName=${templateVars[0]}
       templatePath=${templateVars[1]}
-      if [[ "$lang" =~ ^${templateName}$ ]]; then
+      if [[ $lang == $templateName ]]; then
         echo "" >> .gitignore
         echo "## $templateName ##" >> .gitignore
         cat $templatePath >> .gitignore
