@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 templateDir=$HOME/git/gitignore
+templatePattern='.*/([[:alnum:][:punct:]]+)\.gitignore$'
 templates=()
 for templatePath in $(find $templateDir -name "*.gitignore"); do
-  if [[ $templatePath =~ .*?/([[:alnum:][:punct:]]+)\.gitignore$ ]]; then
+  if [[ $templatePath =~ $templatePattern ]]; then
     name=${BASH_REMATCH[1]}
     path=$templatePath
     templates[${#templates[*]}]="$name:$path"
